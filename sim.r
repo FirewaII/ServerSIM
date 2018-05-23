@@ -4,13 +4,13 @@ serverSim <- function(lambda, mu){
   debug   <- FALSE
   
   # time vars
-  t.end   <- 10^2   # duration of simulation
+  t.end   <- 10^4   # duration of simulation
   t.clock <- 0      # simulation time
   
   # simulation parameters
   # we will be using exponential distribution
   queue             <- 0      # query queue
-  N                 <- 15    # query queue capacity
+  N                 <- 400    # query queue capacity
   nextArrival       <- 0      # time for the next query arrival (reception)
   nextDeparture     <- t.end  # time for the next query departure (service)
   
@@ -20,8 +20,8 @@ serverSim <- function(lambda, mu){
   
   while (t.clock < t.end){
     # Query arrival
-    if (nextArrival < nextDeparture || queue == 0){
-      if (queue < N){
+    if (queue < N && nextArrival < nextDeparture || queue == 0){
+      
         if (debug){
           print("[DEBUG] NEW QUERY ADDED [DEBUG]")
         }
@@ -36,9 +36,9 @@ serverSim <- function(lambda, mu){
           }
           nextDeparture = t.clock + rexp(1, mu)
         }
-      } else {
+      if (queue >= N){
         # server queue has reached its maximum capacity
-        cat("/!\\ MAXIMUM CAPACITY REACHED /!\\ \n")
+        #cat("/!\\ MAXIMUM CAPACITY REACHED /!\\ \n")
         if (debug){
           print("[DEBUG] QUERY DROPPED [DEBUG]")
         }
@@ -58,7 +58,9 @@ serverSim <- function(lambda, mu){
         nextDeparture = t.end
       }
     }
-    print(queue)
+    if(debug){
+      cat("Queue status: ", queue)
+    }
   }
 
   cat('Nombre de requêtes reçues: ', totalArrivals, "\n")
@@ -69,7 +71,7 @@ serverSim <- function(lambda, mu){
 }
 
 cat("- STARTING SIMULATION -\n")
-serverSim(lambda = 1, mu = 1)
+serverSim(lambda = 3, mu = 2)
 cat("- SIMULATION ENDED -")
 
 
