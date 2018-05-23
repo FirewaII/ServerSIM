@@ -1,0 +1,87 @@
+\documentclass[12pt,a4paper,draft]{report}
+\usepackage{graphicx}
+\usepackage[francais]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usepackage{amsfonts}
+\usetikzlibrary {positioning}
+
+\begin{document}
+\begin{titlepage}
+    \centering
+    {\scshape\LARGE ENSIMAG - Grenoble INP \par}
+    \vspace{1cm}
+    {\scshape\Large 3MM1PA - Probabilités Appliquées\par}
+    \vspace{1.5cm}
+    {\huge\bfseries Simulation d'une file d'attente\par}
+    \vspace{2cm}
+    {\Large Othmane AJDOR\par}
+    \vfill
+    encardé par\par
+    Dr.~Hervé \textsc{Guiol}
+
+    \vfill
+
+
+    {\large \today\par}
+\end{titlepage}
+
+% Sujet
+\newpage
+    \section*{Sujet}
+    \paragraph{}
+    Simuler une file d'attente sur un serveur:
+    \begin{itemize}
+        \item Un serveur reçoit une requête suivant une intensité $\lambda > 1$
+        \item Le temps moyen de traitement d'une requête est $\frac{1}{\mu}$ où $\mu > 0$
+        \item Le serveur a une capacité maximale de stockage des requêtes de \linebreak $N \in \mathbb{N}$. 
+         Au delà, la requête est perdue.
+        \item On a le choix sur l'ordre de priorité de traitement des requêtes.
+        \item On suppose qu'on a 3 types de requêtes:
+            \begin{enumerate}
+                \item Prioritaire
+                \item Normale
+                \item Lente
+            \end{enumerate}
+        \item la proportion de prioritaire est $p_1$, normale $p_2$ et lente $p_3$.
+    \end{itemize}
+
+    \paragraph{}
+    Questions:
+    \begin{itemize}
+        \item Quel système garanti au mieux le traitement en tenant compte des priorités.
+        \item Quelle est la probabilité de perte.
+        \item Combien de serveur faudrait-il rajouter pour garantir un bon traitement.
+    \end{itemize}
+    
+% End sujet
+
+% Graph
+\newpage{}
+
+    \begin {center}
+    \begin {tikzpicture}[-latex ,auto ,node distance =1 cm and 2.4cm ,on grid ,
+    state/.style ={ circle ,top color =white , draw, minimum width =1.5 cm}]
+    \node[state] (A) {$0$};
+    \node[state] (B) [right=of A] {$1$};
+    \node[state] (C) [right=of B] {$2$};
+    \node[state] (D) [right=of C] {$...$};
+    \node[state] (E) [right=of D] {$N-1$};
+    \node[state] (F) [right=of E] {$N$};
+    %\path (A) edge [loop above] node[left] {$\lambda$} (A);
+    \path (A) edge [bend left =50] node[above =0.15 cm] {$\lambda$} (B);
+    \path (B) edge [bend left =50] node[below =0.15 cm] {$\mu$} (A);
+    \path (B) edge [bend left =50] node[above =0.15 cm] {$\lambda$} (C);
+    \path (C) edge [bend left =50] node[below =0.15 cm] {$\mu$} (B);
+    \path (C) edge [bend left =50] node[above =0.15 cm] {$\lambda$} (D);
+    \path (D) edge [bend left =50] node[below =0.15 cm] {$\mu$} (C);
+    \path (D) edge [bend left =50] node[above =0.15 cm] {$\lambda$} (E);
+    \path (E) edge [bend left =50] node[below =0.15 cm] {$\mu$} (D);
+    \path (E) edge [bend left =50] node[above =0.15 cm] {$\lambda$} (F);
+    \path (F) edge [bend left =50] node[below =0.15 cm] {$\mu$} (E);
+    \end{tikzpicture}
+    \end{center}
+
+
+\end{document}
+
