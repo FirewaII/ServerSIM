@@ -1,4 +1,4 @@
-serverSim <- function(lambda, mu, fP, nP){
+serverSim <- function(duration, lambda, mu, fP, nP){
   # lambda: Queries arrival rate
   # mu: Queries service/departure rate
   # fP: Fast queries queue proportion 
@@ -9,7 +9,7 @@ serverSim <- function(lambda, mu, fP, nP){
   debug   <- FALSE
   
   # time vars
-  endTime   <- 10^4   # duration of simulation
+  endTime   = duration   # duration of simulation
   currentTime <- 0      # simulation time
   
   # simulation parameters
@@ -42,7 +42,6 @@ serverSim <- function(lambda, mu, fP, nP){
           print("[DEBUG] NEW QUERY ADDED [DEBUG]")
         }
         queryType = runif(1)
-        print(queryType)
         if (queryType < fP){
           fQ = fQ + 1
           totalFA = totalFA + 1
@@ -95,6 +94,9 @@ serverSim <- function(lambda, mu, fP, nP){
     }
   }
 
+  if (busyTime == 0){
+    busyTime = endTime
+  }
   cat('Nombre de requêtes reçues: ', totalArrivals, "\n\t", totalFA," prioritaires\n\t", totalNA," normales\n\t", totalSA," lentes\n")
   cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
   cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
@@ -103,7 +105,15 @@ serverSim <- function(lambda, mu, fP, nP){
 }
 
 cat("- STARTING SIMULATION -\n")
-serverSim(lambda = 0.4, mu = 0.4, fP = 0.2, nP = 0.3)
+# Arguments to edit to customize the server simulation
+duration = 10^4
+lambda = 0.4
+mu = 0.4
+fP = 0.1
+nP = 0.3
+
+serverSim(duration, lambda, mu, fP, nP)
+
 cat("- SIMULATION ENDED -")
 
 
