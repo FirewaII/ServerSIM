@@ -85,6 +85,7 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
         queue = fQ + nQ + sQ
         currentTime = nextDeparture
         totalDepartures = totalDepartures + 1
+        servicedQueries = servicedQueries + 1
       }
       if (queue > 0){
         if (debug){
