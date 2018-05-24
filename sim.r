@@ -13,7 +13,7 @@ serverSim <- function(duration, lambda, mu, fP, nP){
   currentTime <- 0      # simulation time
   
   # simulation parameters
-  # we will be using exponential distribution
+  # we will be using an exponential distribution for incoming and departing queries
   queue             <- 0        # query queue
   fQ                <- 0        # fast queue
   nQ                <- 0        # normal queue
@@ -23,17 +23,17 @@ serverSim <- function(duration, lambda, mu, fP, nP){
   nextArrival       <- 0        # time for the next query arrival (reception)
   nextDeparture     <- endTime  # time for the next query departure (service)
   
-  totalArrivals     <- 0      # total number of received queries
-  totalFA           <- 0      # total number of fast received queries
-  totalNA           <- 0      # total number of normal received queries
-  totalSA           <- 0      # total number of slow received queries
-
-  totalDepartures   <- 0      # total number of serviced queries
-  totalFD           <- 0      # total number of fast serviced queries
-  totalND           <- 0      # total number of normal serviced queries
-  totalSD           <- 0      # total number of slow serviced queries
-
-  busyTime          <- 0      # total time servicing queries
+  totalArrivals     <- 0        # total number of received queries
+  totalFA           <- 0        # total number of fast received queries
+  totalNA           <- 0        # total number of normal received queries
+  totalSA           <- 0        # total number of slow received queries
+  
+  totalDepartures   <- 0        # total number of serviced queries
+  totalFD           <- 0        # total number of fast serviced queries
+  totalND           <- 0        # total number of normal serviced queries
+  totalSD           <- 0        # total number of slow serviced queries
+  
+  busyTime          <- 0        # total time servicing queries
 
   while (currentTime < endTime){
     # Query arrival
@@ -41,6 +41,7 @@ serverSim <- function(duration, lambda, mu, fP, nP){
         if (debug){
           print("[DEBUG] NEW QUERY ADDED [DEBUG]")
         }
+        # Determining query type using proportions
         queryType = runif(1)
         if (queryType < fP){
           fQ = fQ + 1
@@ -52,9 +53,11 @@ serverSim <- function(duration, lambda, mu, fP, nP){
           sQ = sQ + 1
           totalSA = totalSA + 1
         }
+        # Adding a new query, regardless of its type, and calculating its arrival time
         queue = fQ + nQ + sQ
         totalArrivals = totalArrivals + 1
-        currentTime = nextArrival        
+        currentTime = nextArrival    
+        # Predermining the next query's arrival time    
         nextArrival = currentTime + rexp(1, lambda)
         if (queue == 1){
           # Only query in queue is directly serviced
@@ -66,7 +69,7 @@ serverSim <- function(duration, lambda, mu, fP, nP){
         }
     } else {
       # Queue departure
-      # queue = queue - 1
+      # As long as there are more prioritised queries, those will be serviced before moving to the slow queue
       if (fQ > 0){
         fQ = fQ - 1
       } else if (nQ > 0){
@@ -83,6 +86,7 @@ serverSim <- function(duration, lambda, mu, fP, nP){
         }
         nextDeparture = currentTime + rexp(1, mu)
       } else {
+        # Queue is empty, no more queries to service, next service time is moved to the end of the simulation
         nextDeparture = endTime
         busyTime = busyTime + currentTime - lastBusyTime
       }
