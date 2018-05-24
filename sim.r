@@ -14,7 +14,7 @@ serverSim <- function(lambda, mu){
   nQ                <- 0        # normal queue
   sQ                <- 0        # slow queue
 
-  N                 <- 400      # total query queue(s) capacity
+  N                 <- 100      # total query queue(s) capacity
   nextArrival       <- 0        # time for the next query arrival (reception)
   nextDeparture     <- endTime  # time for the next query departure (service)
   
@@ -79,11 +79,13 @@ serverSim <- function(lambda, mu){
         nextDeparture = currentTime + rexp(1, mu)
       } else {
         nextDeparture = endTime
-        busyTime = busyTime - lastBusyTime + currentTime
+        busyTime = busyTime + currentTime - lastBusyTime
       }
     }
     if(debug){
-      cat("Queue status: ", queue)
+      cat("busyTime : ", busyTime, "\n")
+      cat("lastBusyTime: ", lastBusyTime, "\n")
+      cat("Queue status: ", queue, "\n")
     }
   }
 
@@ -91,11 +93,11 @@ serverSim <- function(lambda, mu){
   cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
   cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
   cat('Nombre de requêtes restantes à la fin de la simulation: ', queue, "\n")
-  cat('Temps total de service: ', busyTime/10^6, " secondes\n")
+  cat('Ratio (Temps de service)/(Temps de simulation): ', round(busyTime/endTime, 4)*100, "%\n")
 }
 
 cat("- STARTING SIMULATION -\n")
-serverSim(lambda = 0.2, mu = 0.3)
+serverSim(lambda = 0.4, mu = 0.4)
 cat("- SIMULATION ENDED -")
 
 
