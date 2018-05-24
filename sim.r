@@ -37,6 +37,9 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
   
   busyTime          <- 0        # total time servicing queries
 
+  if(nS < 1){
+    return(cat("Le nombre de serveur ne peut pas être nul.\n"))
+  }
   while (currentTime < endTime){
     # Query arrival
     if (queue < N && nextArrival < nextDeparture || queue == 0){
@@ -60,13 +63,13 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
         totalArrivals = totalArrivals + 1
         currentTime = nextArrival    
         # Predermining the next query's arrival time    
-        nextArrival = currentTime + rexp(1, lambda)
+        nextArrival = currentTime + rexp(1, 1/lambda)
         if (queue == 1){
           # Only query in queue is directly serviced
           if (debug){
             print("[DEBUG] SERVICING ONLY QUERY IN QUEUE [DEBUG]")
           }
-          nextDeparture = currentTime + rexp(1, mu)
+          nextDeparture = currentTime + rexp(1, 1/mu)
           lastBusyTime = currentTime
         }
     } else {
@@ -87,12 +90,12 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
         totalDepartures = totalDepartures + 1
         servicedQueries = servicedQueries + 1
       }
-      if (queue > 0){
+      if (queue > 0 || servicedQueries > 0){
         if (debug){
           print("[DEBUG] SERVICING QUERY [DEBUG]")
         }
         while (servicedQueries > 0 && queue > 0){
-          nextDeparture = currentTime + rexp(1, mu)
+          nextDeparture = currentTime + rexp(1, 1/mu)
           servicedQueries = servicedQueries - 1
         }
       } 
@@ -109,9 +112,9 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
     }
   }
 
-  if (busyTime == 0){
-    busyTime = endTime
-  }
+  #if (busyTime == 0){
+  #  busyTime = endTime
+  #}
   cat('Nombre de requêtes reçues: ', totalArrivals, "\n\t", totalFA," prioritaires\n\t", totalNA," normales\n\t", totalSA," lentes\n")
   cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
   cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
@@ -124,8 +127,8 @@ cat("- STARTING SIMULATION -\n")
 
 # Arguments to edit to customize the server simulation
 duration = 10^4
-lambda = 0.4
-mu = 0.4
+lambda = 1
+mu = 0.8
 fP = 0.1
 nP = 0.3
 nS = 3
