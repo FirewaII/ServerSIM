@@ -72,8 +72,8 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
     } else {
       # Queue departure
       # As long as there are more prioritised queries, those will be serviced before moving to the slow queue
-      servicedQueries = 0
-      while (servicedQueries < nS && queue > 0){
+      servicedQueries = 1
+      while (servicedQueries <= nS && queue > 0){
         # Servicing queries as long as there are any in queue and as many as the servers can handle (number of servers)
         if (fQ > 0){
           fQ = fQ - 1
