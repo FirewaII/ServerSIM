@@ -1,9 +1,11 @@
-serverSim <- function(duration, lambda, mu, fP, nP){
+serverSim <- function(duration, ns, lambda, mu, fP, nP){
   # lambda: Queries arrival rate
   # mu: Queries service/departure rate
   # fP: Fast queries queue proportion 
   # nP: Normal queries queue proportion
-  # proportion of slow queries is the rest of 1 - (fP + nP)
+  # nS: Number of servers
+
+  # proportion of slow queries is 1 - (fP + nP)
   
   # DEBUG
   debug   <- FALSE
@@ -70,22 +72,30 @@ serverSim <- function(duration, lambda, mu, fP, nP){
     } else {
       # Queue departure
       # As long as there are more prioritised queries, those will be serviced before moving to the slow queue
-      if (fQ > 0){
-        fQ = fQ - 1
-      } else if (nQ > 0){
-        nQ = nQ - 1
-      } else {
-        sQ = sQ - 1
+      servicedQueries = 0
+      while (servicedQueries < nS && queue > 0){
+        # Servicing queries as long as there are any in queue and as many as the servers can handle (number of servers)
+        if (fQ > 0){
+          fQ = fQ - 1
+        } else if (nQ > 0){
+          nQ = nQ - 1
+        } else {
+          sQ = sQ - 1
+        }
+        queue = fQ + nQ + sQ
+        currentTime = nextDeparture
+        totalDepartures = totalDepartures + 1
       }
-      queue = fQ + nQ + sQ
-      currentTime = nextDeparture
-      totalDepartures = totalDepartures + 1
       if (queue > 0){
         if (debug){
           print("[DEBUG] SERVICING QUERY [DEBUG]")
         }
-        nextDeparture = currentTime + rexp(1, mu)
-      } else {
+        while (servicedQueries > 0 && queue > 0){
+          nextDeparture = currentTime + rexp(1, mu)
+          servicedQueries = servicedQueries - 1
+        }
+      } 
+      if (queue == 0) {
         # Queue is empty, no more queries to service, next service time is moved to the end of the simulation
         nextDeparture = endTime
         busyTime = busyTime + currentTime - lastBusyTime
@@ -104,19 +114,22 @@ serverSim <- function(duration, lambda, mu, fP, nP){
   cat('Nombre de requêtes reçues: ', totalArrivals, "\n\t", totalFA," prioritaires\n\t", totalNA," normales\n\t", totalSA," lentes\n")
   cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
   cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
+  # Remaining queries are considered lost queries since simulation ended too early
   cat('Nombre de requêtes restantes à la fin de la simulation: ', queue, "\n")
   cat('Taux d\'utilisation: ', round(busyTime/endTime, 4)*100, "%\n")
 }
 
 cat("- STARTING SIMULATION -\n")
+
 # Arguments to edit to customize the server simulation
 duration = 10^4
 lambda = 0.4
 mu = 0.4
 fP = 0.1
 nP = 0.3
+nS = 3
 
-serverSim(duration, lambda, mu, fP, nP)
+serverSim(duration, ns, lambda, mu, fP, nP)
 
 cat("- SIMULATION ENDED -")
 
