@@ -42,7 +42,7 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
   }
   while (currentTime < endTime){
     # Query arrival
-    if (queue < N && nextArrival < nextDeparture || queue == 0){
+    if (nextArrival < nextDeparture || queue == 0){
         if (debug){
           print("[DEBUG] NEW QUERY ADDED [DEBUG]")
         }
@@ -63,13 +63,13 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
         totalArrivals = totalArrivals + 1
         currentTime = nextArrival    
         # Predermining the next query's arrival time    
-        nextArrival = currentTime + rexp(1, 1/lambda)
+        nextArrival = currentTime + rexp(1, lambda)
         if (queue == 1){
           # Only query in queue is directly serviced
           if (debug){
             print("[DEBUG] SERVICING ONLY QUERY IN QUEUE [DEBUG]")
           }
-          nextDeparture = currentTime + rexp(1, 1/mu)
+          nextDeparture = currentTime + rexp(1, mu)
           lastBusyTime = currentTime
         }
     } else {
@@ -95,26 +95,32 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
           print("[DEBUG] SERVICING QUERY [DEBUG]")
         }
         while (servicedQueries > 0 && queue > 0){
-          nextDeparture = currentTime + rexp(1, 1/mu)
+          furthestDeparture = currentTime + rexp(1, mu)
+          if (furthestDeparture > nextDeparture){
+            nextDeparture = furthestDeparture
+          }
           servicedQueries = servicedQueries - 1
         }
       } 
-      if (queue == 0) {
-        # Queue is empty, no more queries to service, next service time is moved to the end of the simulation
-        nextDeparture = endTime
-        busyTime = busyTime + currentTime - lastBusyTime
-      }
+      
     }
+    if (queue == 0) {
+      # Queue is empty, no more queries to service, next service time is moved to the end of the simulation
+      nextDeparture = endTime
+      busyTime = busyTime + currentTime - lastBusyTime
+    }
+
     if(debug){
       cat("busyTime : ", busyTime, "\n")
       cat("lastBusyTime: ", lastBusyTime, "\n")
       cat("Queue status: ", queue, "\n")
     }
   }
+  busyTime = busyTime + currentTime - lastBusyTime
 
-  #if (busyTime == 0){
-  #  busyTime = endTime
-  #}
+  if (busyTime > endTime){
+    busyTime = endTime
+  }
   cat('Nombre de requêtes reçues: ', totalArrivals, "\n\t", totalFA," prioritaires\n\t", totalNA," normales\n\t", totalSA," lentes\n")
   cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
   cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
@@ -127,11 +133,11 @@ cat("- STARTING SIMULATION -\n")
 
 # Arguments to edit to customize the server simulation
 duration = 10^4
-lambda = 1
-mu = 0.8
+lambda = 0.5
+mu = 0.3
 fP = 0.1
 nP = 0.3
-nS = 3
+nS = 1
 
 serverSim(duration, ns, lambda, mu, fP, nP)
 
