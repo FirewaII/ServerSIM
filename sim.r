@@ -1,4 +1,5 @@
 serverSim <- function(duration, ns, lambda, mu, fP, nP){
+  # duration: Duration of the simulation
   # lambda: Queries arrival rate
   # mu: Queries service/departure rate
   # fP: Fast queries queue proportion 
@@ -21,7 +22,7 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
   nQ                <- 0        # normal queue
   sQ                <- 0        # slow queue
 
-  N                 <- 100      # total query queue(s) capacity
+  N                 <- 9000      # total query queue(s) capacity
   nextArrival       <- 0        # time for the next query arrival (reception)
   nextDeparture     <- endTime  # time for the next query departure (service)
   
@@ -117,7 +118,13 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
     }
   }
   busyTime = busyTime + currentTime - lastBusyTime
-
+  
+  if (nextDeparture>endTime){
+    if (debug){
+      print("[DEBUG] SERVICE TIME IS BEYOND THE END [DEBUG]")
+    }
+    totalDepartures = totalDepartures - 1
+  }
   if (busyTime > endTime){
     busyTime = endTime
   }
@@ -132,12 +139,12 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
 cat("- STARTING SIMULATION -\n")
 
 # Arguments to edit to customize the server simulation
-duration = 10^4
-lambda = 0.5
-mu = 0.3
-fP = 0.1
-nP = 0.3
-nS = 1
+duration = 10^4   # Duration of the simulation
+lambda = 0.1      # Queries arrival rate
+mu = 0.3          # Queries service/departure rate
+fP = 0.1          # Fast queries queue proportion 
+nP = 0.3          # Normal queries queue proportion
+nS = 1           # Number of servers
 
 serverSim(duration, ns, lambda, mu, fP, nP)
 
