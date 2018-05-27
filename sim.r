@@ -1,16 +1,17 @@
-serverSim <- function(duration, ns, lambda, mu, fP, nP){
+serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
   # duration: Duration of the simulation
   # lambda: Queries arrival rate
   # mu: Queries service/departure rate
   # fP: Fast queries queue proportion 
   # nP: Normal queries queue proportion
   # nS: Number of servers
-
+  # simType : End of simulation return setting (busy time or lost queries)
   # proportion of slow queries is 1 - (fP + nP)
   
   # DEBUG
   debug   <- FALSE
-  
+  showResults <- FALSE
+
   # time vars
   endTime   = duration   # duration of simulation
   currentTime <- 0      # simulation time
@@ -128,12 +129,21 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
   if (busyTime > endTime){
     busyTime = endTime
   }
-  cat('Nombre de requêtes reçues: ', totalArrivals, "\n\t", totalFA," prioritaires\n\t", totalNA," normales\n\t", totalSA," lentes\n")
-  cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
-  cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
-  # Remaining queries are considered lost queries since simulation ended too early
-  cat('Nombre de requêtes restantes à la fin de la simulation: ', queue, "\n")
-  cat('Taux d\'utilisation: ', round(busyTime/endTime, 4)*100, "%\n")
+  busyRate = round(busyTime/endTime, 4)*100
+  if (showResults){
+    cat('Nombre de requêtes reçues: ', totalArrivals, "\n\t", totalFA," prioritaires\n\t", totalNA," normales\n\t", totalSA," lentes\n")
+    cat('Nombre de requêtes traitées: ', totalDepartures, "\n")
+    cat('Nombre de requêtes perdues: ', totalArrivals - totalDepartures, "\n")
+    # Remaining queries are considered lost queries since simulation ended too early
+    cat('Nombre de requêtes restantes à la fin de la simulation: ', queue, "\n")
+    cat('Taux d\'utilisation: ', busyRate, "%\n")
+  }
+
+  if (simType == "busy"){
+    return(busyRate)
+  } else if (simType == "lostQueries") {
+    return(totalArrivals - totalDepartures)
+  }
 }
 
 cat("- STARTING SIMULATION -\n")
@@ -141,12 +151,45 @@ cat("- STARTING SIMULATION -\n")
 # Arguments to edit to customize the server simulation
 duration = 10^4   # Duration of the simulation
 lambda = 0.6      # Queries arrival rate
-mu = 0.5          # Queries service/departure rate
+mu = 1            # Queries service/departure rate
 fP = 0.1          # Fast queries queue proportion 
 nP = 0.3          # Normal queries queue proportion
-nS = 3            # Number of servers
+nS = 1            # Number of servers
+nSim = 1:100      #
 
-serverSim(duration, ns, lambda, mu, fP, nP)
+#serverSim(duration, ns, lambda, mu, fP, nP)
+
+# Lost queries simulation
+cat("1 Serveur ; mu = 1\n")
+
+lostQueries = 0
+lambda = 0.1
+mu = 1
+nS = 1
+plotSeq = seq(0.1, 10, 0.1)
+for (n in nSim){
+  lostQueries[n] = serverSim(duration, ns, lambda, mu, fP, nP, "lostQueries")
+  lambda = lambda + 0.1
+}
+
+plot(plotSeq, lostQueries, main=expression(paste("Perte des requêtes en fonction du taux d'arrivée pour 100 simulations ( ", mu, "=1 )")), xlab=expression(lambda) , ylab = "Nombre de pertes", las=1)
+
+# Busy time/rate simulation
+cat("n Serveurs ; lambda = 2 ; mu = 1\n")
+
+nSim = 1:50
+busyRate = 0
+lambda = 2
+mu = 1
+nS = 1
+plotSeq = seq(1, 50)
+for (n in nSim){
+  busyRate[n] = serverSim(duration, ns, lambda, mu, fP, nP, "busy")
+  nS = nS + 1
+}
+
+plot(plotSeq, busyRate, main=expression(paste("Taux d'utilisation en fonction du nombre de serveurs pour 50 simulations ( ",lambda,"=2, ", mu, "=1 )")), xlab="Nombre de serveurs" , ylab = "Taux d'utilisation", las=1)
+
 
 cat("- SIMULATION ENDED -")
 

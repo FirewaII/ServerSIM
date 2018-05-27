@@ -30,32 +30,32 @@
     \tableofcontents
     
     % Sujet
-    \newpage
-        \section*{Sujet}
-        \paragraph{}
-        Simuler une file d'attente sur un serveur:
-        \begin{itemize}
-            \item Un serveur reçoit une requête suivant une intensité $\lambda > 1$
-            \item Le temps moyen de traitement d'une requête est $\frac{1}{\mu}$ où $\mu > 0$
-            \item Le serveur a une capacité maximale de stockage des requêtes de \linebreak $N \in \mathbb{N}$. 
-             Au delà, la requête est perdue.
-            \item On a le choix sur l'ordre de priorité de traitement des requêtes.
-            \item On suppose qu'on a 3 types de requêtes:
-                \begin{enumerate}
-                    \item Prioritaire
-                    \item Normale
-                    \item Lente
-                \end{enumerate}
-            \item la proportion de prioritaire est $p_1$, normale $p_2$ et lente $p_3$.
-        \end{itemize}
-    
-        \paragraph{}
-        Questions:
-        \begin{itemize}
-            \item Quel système garanti au mieux le traitement en tenant compte des priorités.
-            \item Quelle est la probabilité de perte.
-            \item Combien de serveur faudrait-il rajouter pour garantir un bon traitement.
-        \end{itemize}
+    %\newpage
+    %    \section*{Sujet}
+    %    \paragraph{}
+    %    Simuler une file d'attente sur un serveur:
+    %    \begin{itemize}
+    %        \item Un serveur reçoit une requête suivant une %intensité $\lambda > 1$
+    %        \item Le temps moyen de traitement d'une requête est %$\frac{1}{\mu}$ où $\mu > 0$
+    %        \item Le serveur a une capacité maximale de stockage %des requêtes de \linebreak $N \in \mathbb{N}$. 
+    %         Au delà, la requête est perdue.
+    %        \item On a le choix sur l'ordre de priorité de %traitement des requêtes.
+    %        \item On suppose qu'on a 3 types de requêtes:
+    %            \begin{enumerate}
+    %                \item Prioritaire
+    %                \item Normale
+    %                \item Lente
+    %            \end{enumerate}
+    %        \item la proportion de prioritaire est $p_1$, normale %$p_2$ et lente $p_3$.
+    %    \end{itemize}
+    %
+    %    \paragraph{}
+    %    Questions:
+    %    \begin{itemize}
+    %        \item Quel système garanti au mieux le traitement en %tenant compte des priorités.
+    %        \item Quelle est la probabilité de perte.
+    %        \item Combien de serveur faudrait-il rajouter pour %garantir un bon traitement.
+    %    \end{itemize}
         
     % End sujet
     
@@ -143,7 +143,33 @@
     
         \newpage
     \section{Résultats}
-    \par 
+    Dans la suite des simulation suivante, on considère le temps de simulation $duration = 10^4$, la capacité de la file d'attente $N = 150$, la proportion des requêtes prioritaires $fP = 0.1$ et la proportion des requêtes normales $nP = 0.3$.
+    \subsection{Perte de requête}
+    \par Dans la simulation suivante, on considère que le nombre de serveurs traitant les requêtes $nS = 1$ pour un paramètre $\lambda = [{0.1},{10}]$ et $ \mu = 1$.
+    
+    \begin{center}
+        \begin{figure}[H]
+            \includegraphics[scale=0.7]{lostQueries.png}
+            \caption{Traitement des requêtes par N serveurs}
+        \end{figure}
+    \end{center}
+    
+    On observe dans le résultat de cette simulation que le nombre de requêtes perdues augmente de façon linéaire à partir de $\lambda = 0.7$ et dépasse les 80000 requêtes perdues à partir de $\lambda = 9$ par rapport à $\mu = 1$.
+    
+    \subsection{Taux d'utilisation multi-serveur}
+    \par Dans la simulation suivante, on considère que $\lambda = 2$, $\mu = 1$ et un paramètre $nS = [{1},{50}]$.
+    
+    \begin{center}
+        \begin{figure}[H]
+            \includegraphics[scale=0.7]{busyRate.png}
+            \caption{Traitement des requêtes par N serveurs}
+        \end{figure}
+    \end{center}
+
+    On observe dans le résultat de cette simulation que le taux d'utilisation est constant à environ $100\%$ pour $nS = [{1},{4}]$ et commence à diminuer jusqu'à atteindre une valeur comprise entre 65 et 70 pour $nS = [{9},{11}]$.
+    \newline
+    \par A partir de $nS = 10$, le taux d'utilisation se stabilise, ce qui signifie qu'augmenter le nombre de serveurs au delà de 10 ne contribue pas à la diminution de celui-ci.
+
     
 \end{document}
     
