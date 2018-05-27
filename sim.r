@@ -22,7 +22,7 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP){
   nQ                <- 0        # normal queue
   sQ                <- 0        # slow queue
 
-  N                 <- 9000      # total query queue(s) capacity
+  N                 <- 150      # total query queue(s) capacity
   nextArrival       <- 0        # time for the next query arrival (reception)
   nextDeparture     <- endTime  # time for the next query departure (service)
   
@@ -140,11 +140,11 @@ cat("- STARTING SIMULATION -\n")
 
 # Arguments to edit to customize the server simulation
 duration = 10^4   # Duration of the simulation
-lambda = 0.1      # Queries arrival rate
-mu = 0.3          # Queries service/departure rate
+lambda = 0.6      # Queries arrival rate
+mu = 0.5          # Queries service/departure rate
 fP = 0.1          # Fast queries queue proportion 
 nP = 0.3          # Normal queries queue proportion
-nS = 1           # Number of servers
+nS = 3            # Number of servers
 
 serverSim(duration, ns, lambda, mu, fP, nP)
 
