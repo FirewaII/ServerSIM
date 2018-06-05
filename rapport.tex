@@ -170,6 +170,21 @@
     \newline
     \par A partir de $nS = 10$, le taux d'utilisation se stabilise, ce qui signifie qu'augmenter le nombre de serveurs au delà de 10 ne contribue pas à la diminution de celui-ci.
 
+    \newpage
+    \subsection{Distribution des requêtes dans la file d'attente}
+    \par Dans la simulation suivante, on considère que $\lambda = 1$, $\mu = 1$ et le nombre de serveurs $nS = 2$. On rappelle que la proportion des requêtes prioritaires est de 10\%, celle des requêtes normales 30\% et le reste est utilisé par les requêtes lentes. \newline
+    On lance la simulation pour une durée de 100 instants pour une meilleure visibilité de la répartition des requêtes.
+    
+    \begin{center}
+        \begin{figure}[H]
+            \includegraphics[scale=0.7]{queryDistribution.png}
+            \caption{Distribution des requêtes durant les 100 premiers instants}
+        \end{figure}
+    \end{center}
+
+    On observe dans le résultat de cette simulation que le nombre de requêtes varie bien en fonction de la proportion des requêtes dans la file d'attente. Soit le nombre de requêtes prioritaire $\leq 2$, celui des requêtes normales $\leq 5$, et le reste est occupé par les requêtes lentes dont la proportion est la plus importante.
+
+
     
 \end{document}
     

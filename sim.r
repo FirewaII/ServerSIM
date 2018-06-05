@@ -1,4 +1,4 @@
-serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
+serverSim <- function(duration, ns, lambda, mu, fP, nP, simType, showResults = FALSE){
   # duration: Duration of the simulation
   # lambda: Queries arrival rate
   # mu: Queries service/departure rate
@@ -10,8 +10,7 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
   
   # DEBUG
   debug   <- FALSE
-  showResults <- FALSE
-
+  
   # time vars
   endTime   = duration   # duration of simulation
   currentTime <- 0      # simulation time
@@ -22,7 +21,7 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
   fQ                <- 0        # fast queue
   nQ                <- 0        # normal queue
   sQ                <- 0        # slow queue
-
+  
   N                 <- 150      # total query queue(s) capacity
   nextArrival       <- 0        # time for the next query arrival (reception)
   nextDeparture     <- endTime  # time for the next query departure (service)
@@ -38,42 +37,49 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
   totalSD           <- 0        # total number of slow serviced queries
   
   busyTime          <- 0        # total time servicing queries
-
+  
+  timeStep          <- 1
+  timeState         <- 0
+  mQState           <- 0
+  fQState           <- 0
+  nQState           <- 0
+  sQState           <- 0
+  
   if(nS < 1){
     return(cat("Le nombre de serveur ne peut pas être nul.\n"))
   }
   while (currentTime < endTime){
     # Query arrival
     if (nextArrival < nextDeparture || queue == 0){
+      if (debug){
+        print("[DEBUG] NEW QUERY ADDED [DEBUG]")
+      }
+      # Determining query type using proportions
+      queryType = runif(1)
+      if (queryType < fP){
+        fQ = fQ + 1
+        totalFA = totalFA + 1
+      } else if (queryType < fP + nP){
+        nQ = nQ + 1
+        totalNA = totalNA + 1
+      } else {
+        sQ = sQ + 1
+        totalSA = totalSA + 1
+      }
+      # Adding a new query, regardless of its type, and calculating its arrival time
+      queue = fQ + nQ + sQ
+      totalArrivals = totalArrivals + 1
+      currentTime = nextArrival    
+      # Predermining the next query's arrival time    
+      nextArrival = currentTime + rexp(1, lambda)
+      if (queue == 1){
+        # Only query in queue is directly serviced
         if (debug){
-          print("[DEBUG] NEW QUERY ADDED [DEBUG]")
+          print("[DEBUG] SERVICING ONLY QUERY IN QUEUE [DEBUG]")
         }
-        # Determining query type using proportions
-        queryType = runif(1)
-        if (queryType < fP){
-          fQ = fQ + 1
-          totalFA = totalFA + 1
-        } else if (queryType < fP + nP){
-          nQ = nQ + 1
-          totalNA = totalNA + 1
-        } else {
-          sQ = sQ + 1
-          totalSA = totalSA + 1
-        }
-        # Adding a new query, regardless of its type, and calculating its arrival time
-        queue = fQ + nQ + sQ
-        totalArrivals = totalArrivals + 1
-        currentTime = nextArrival    
-        # Predermining the next query's arrival time    
-        nextArrival = currentTime + rexp(1, lambda)
-        if (queue == 1){
-          # Only query in queue is directly serviced
-          if (debug){
-            print("[DEBUG] SERVICING ONLY QUERY IN QUEUE [DEBUG]")
-          }
-          nextDeparture = currentTime + rexp(1, mu)
-          lastBusyTime = currentTime
-        }
+        nextDeparture = currentTime + rexp(1, mu)
+        lastBusyTime = currentTime
+      }
     } else {
       # Queue departure
       # As long as there are more prioritised queries, those will be serviced before moving to the slow queue
@@ -111,11 +117,20 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
       nextDeparture = endTime
       busyTime = busyTime + currentTime - lastBusyTime
     }
-
+    
     if(debug){
       cat("busyTime : ", busyTime, "\n")
       cat("lastBusyTime: ", lastBusyTime, "\n")
       cat("Queue status: ", queue, "\n")
+    }
+    
+    if(simType == "queue") { # Si on veut plotter
+      timeState[timeStep] = currentTime
+      mQState[timeStep] = queue # On combine les vecteurs (total)
+      fQState[timeStep] = fQ
+      nQState[timeStep] = nQ
+      sQState[timeStep] = sQ
+      timeStep = timeStep + 1
     }
   }
   busyTime = busyTime + currentTime - lastBusyTime
@@ -138,26 +153,37 @@ serverSim <- function(duration, ns, lambda, mu, fP, nP, simType){
     cat('Nombre de requêtes restantes à la fin de la simulation: ', queue, "\n")
     cat('Taux d\'utilisation: ', busyRate, "%\n")
   }
-
+  
   if (simType == "busy"){
     return(busyRate)
   } else if (simType == "lostQueries") {
     return(totalArrivals - totalDepartures)
+  } else if (simType == "queue"){
+    plotSeq = seq(1, timeStep-1)
+    plot(timeState, mQState, xlab="temps", ylab="Nombre de requetes",type="s", main="Nombre de requetes dans la file d'attente") # On plote
+    points(timeState, fQState, col="red", pch=NA_integer_)
+    lines(timeState, fQState, col="red")
+    points(timeState, nQState, col="blue", pch=NA_integer_)
+    lines(timeState, nQState, col="blue")
+    points(timeState, sQState, col="green", pch=NA_integer_)
+    lines(timeState, sQState, col="green")
+    legend("topleft",legend=c("total","prioritaires","normales","lentes"), col=c("black", "red","blue","green"),lty=c(1,1,1,1), ncol=1)
   }
+
 }
 
 cat("- STARTING SIMULATION -\n")
 
 # Arguments to edit to customize the server simulation
 duration = 10^4   # Duration of the simulation
-lambda = 0.6      # Queries arrival rate
+lambda = 1        # Queries arrival rate
 mu = 1            # Queries service/departure rate
 fP = 0.1          # Fast queries queue proportion 
 nP = 0.3          # Normal queries queue proportion
 nS = 1            # Number of servers
 nSim = 1:100      #
 
-#serverSim(duration, ns, lambda, mu, fP, nP)
+
 
 # Lost queries simulation
 cat("1 Serveur ; mu = 1\n")
@@ -190,7 +216,24 @@ for (n in nSim){
 
 plot(plotSeq, busyRate, main=expression(paste("Taux d'utilisation en fonction du nombre de serveurs pour 50 simulations ( ",lambda,"=2, ", mu, "=1 )")), xlab="Nombre de serveurs" , ylab = "Taux d'utilisation", las=1)
 
+# Queue proportions simulation
+duration = 10^2
+lambda = 1
+mu = 1
+nS = 2
+serverSim(duration, ns, lambda, mu, fP, nP, "queue")
+
+
+# Normal simulation
+duration = 10^4
+lambda = 1
+mu = 1
+nS = 2
+serverSim(duration, nS, lambda, mu, fP, nP, simType = "", showResults = TRUE)
 
 cat("- SIMULATION ENDED -")
+
+
+
 
 
